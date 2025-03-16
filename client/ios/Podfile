@@ -21,6 +21,7 @@ target 'client' do
 
   # Add simdjson pod explicitly
   pod 'simdjson', :path => './Pods/Local Podspecs/simdjson.podspec'
+  pod 'React-jsi', :path => '../node_modules/react-native/ReactCommon/jsi', :modular_headers => true
 
   if ENV['EXPO_USE_COMMUNITY_AUTOLINKING'] == '1'
     config_command = ['node', '-e', "process.argv=['', '', 'config'];require('@react-native-community/cli').run()"];
