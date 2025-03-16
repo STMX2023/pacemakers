@@ -1,8 +1,13 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { User } from '@supabase/supabase-js';
+import { User as SupabaseUser } from '@supabase/supabase-js';
 import * as authService from '@/services/auth.service';
+
+// Use our custom User type that extends SupabaseUser
+type User = SupabaseUser & {
+  name?: string;
+};
 
 interface AuthState {
   isAuthenticated: boolean;

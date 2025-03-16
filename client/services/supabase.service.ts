@@ -5,10 +5,23 @@ import { makeRedirectUri } from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
+import { 
+  SUPABASE_URL, 
+  SUPABASE_ANON_KEY, 
+  APP_REDIRECT_URI, 
+  EXPO_REDIRECT_SCHEME,
+  IOS_BUNDLE_IDENTIFIER,
+  ANDROID_PACKAGE,
+  EXPO_DEV_REDIRECT
+} from '@env';
 
 // Initialize Supabase
-const supabaseUrl = process.env.SUPABASE_URL || 'https://dpfhcesnpbmfbsrvqrkc.supabase.co';
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRwZmhjZXNucGJtZmJzcnZxcmtjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEyMDU1MDIsImV4cCI6MjA1Njc4MTUwMn0._HEBPSsmNVItBOQobvBfqeqoMhfyNCEk9YuNNcQ7Wd0';
+const supabaseUrl = SUPABASE_URL;
+const supabaseAnonKey = SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Missing Supabase environment variables. Please check your .env file.');
+}
 
 // Create Supabase client
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
@@ -23,25 +36,26 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 // Get custom redirect URI
 // This will be used for the OAuth flow
 export const getRedirectUri = () => {
-  // For standalone apps, use the defined scheme
-  const scheme = Constants.expoConfig?.scheme;
-  
-  // Check if we're running in Expo Go
+  // Determine the best redirect URI based on environment
   const isExpoGo = Constants.appOwnership === 'expo';
+  const scheme = EXPO_REDIRECT_SCHEME;
   
   if (isExpoGo) {
     // For development in Expo Go
-    return makeRedirectUri({
+    return EXPO_DEV_REDIRECT || makeRedirectUri({
       path: 'auth/callback',
       preferLocalhost: true,
     });
-  } else if (scheme) {
-    // For standalone apps
-    return `${scheme}://auth/callback`;
+  } else if (Platform.OS === 'ios') {
+    // For iOS standalone apps
+    return `${IOS_BUNDLE_IDENTIFIER}://auth/callback`;
+  } else if (Platform.OS === 'android') {
+    // For Android standalone apps
+    return `${ANDROID_PACKAGE}://auth/callback`;
   }
   
-  // Fallback for web or other environments
-  return 'pacemakers://auth/callback';
+  // Fallback
+  return APP_REDIRECT_URI;
 };
 
 // Get Google OAuth URL

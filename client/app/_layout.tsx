@@ -8,12 +8,17 @@ import { View, Text, ActivityIndicator } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useAuth } from '@/authentication/hooks/useAuth';
 
+// Set explicit initial route
+export const unstable_settings = {
+  initialRouteName: 'index',
+};
+
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isLoading: authLoading } = useAuth();
   const [appIsReady, setAppIsReady] = useState(false);
   
   const [loaded] = useFonts({
@@ -24,24 +29,26 @@ export default function RootLayout() {
     if (loaded) {
       // Only mark the app as ready when fonts are loaded
       setAppIsReady(true);
-      SplashScreen.hideAsync().catch(console.error);
+      SplashScreen.hideAsync().catch((err) => {
+        console.warn('Error hiding splash screen:', err);
+      });
     }
   }, [loaded]);
 
   // Show a loading state until everything is ready
-  if (!appIsReady || isLoading) {
+  if (!appIsReady || authLoading) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
         <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={{ marginTop: 20 }}>Loading...</Text>
+        <Text style={{ marginTop: 20, fontSize: 16 }}>Loading...</Text>
       </View>
     );
   }
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      {/* Use a Stack here instead of conditional rendering to avoid navigation issues */}
       <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(app)" />
         <Stack.Screen name="+not-found" />
