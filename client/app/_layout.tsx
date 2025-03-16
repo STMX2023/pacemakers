@@ -7,6 +7,7 @@ import { View, Text, ActivityIndicator } from 'react-native';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useAuth } from '@/authentication/hooks/useAuth';
+import { installAuthInterceptor } from '@/utils/api.interceptor';
 
 // Set explicit initial route
 export const unstable_settings = {
@@ -15,6 +16,9 @@ export const unstable_settings = {
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
+
+// Install auth interceptor when the module loads
+installAuthInterceptor();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();

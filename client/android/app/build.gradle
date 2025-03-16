@@ -89,9 +89,9 @@ Project background_fetch = project(':react-native-background-fetch')
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.x779wv3.client'
+    namespace 'com.x779wv3.pacemakers'
     defaultConfig {
-        applicationId 'com.x779wv3.client'
+        applicationId 'com.x779wv3.pacemakers'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

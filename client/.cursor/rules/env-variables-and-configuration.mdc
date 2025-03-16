@@ -1,0 +1,46 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Environment Variables and Configuration
+
+## Overview
+This project uses environment variables to configure Expo and React Native settings. Instead of hardcoding values in app.json, the project uses an app.config.ts file that reads from .env variables, providing a more flexible and secure approach to configuration.
+
+## Configuration System
+
+### Key Files
+- `.env`: Stores all configuration values and environment variables
+- `.env.example`: Template showing required variables (without sensitive values)
+- `app.config.ts`: Dynamic configuration file that pulls from environment variables
+- `types/env.d.ts`: TypeScript definitions for environment variables
+
+### Fallback Mechanism
+Configuration values are resolved in this order:
+1. Primary environment variables (APP_NAME, etc.)
+2. Values in the existing config object
+3. Default environment variables (DEFAULT_APP_NAME, etc.)
+
+This ensures the app will work even if some environment variables are missing.
+
+## Environment Variable Categories
+- Apply to project-over...
+
+## Best Practices
+- Never hardcode configuration values in the app code
+- Always use environment variables for configuration
+- Provide sensible defaults through the DEFAULT_ variables
+- Keep sensitive information like API keys in environment variables
+- Update type definitions in env.d.ts when adding new environment variables
+- Use fallback mechanisms to ensure the app works without all variables set
+
+## Adding New Configuration Values
+When adding new configuration:
+1. Add the variable to `.env`
+2. Add it to `.env.example` (with non-sensitive default value)
+3. Add TypeScript type in `types/env.d.ts`
+4. Use it in `app.config.ts` with proper fallbacks
+5. Use type assertions for TypeScript compatibility
+
+

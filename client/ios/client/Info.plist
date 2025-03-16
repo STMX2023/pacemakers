@@ -27,8 +27,8 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>myapp</string>
-          <string>com.x779wv3.client</string>
+          <string>com.x779wv3.pacemakers</string>
+          <string>com.x779wv3.pacemakers</string>
         </array>
       </dict>
     </array>

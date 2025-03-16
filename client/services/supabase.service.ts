@@ -1,5 +1,4 @@
 import 'react-native-url-polyfill/auto';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
 import { makeRedirectUri } from 'expo-auth-session';
 import * as WebBrowser from 'expo-web-browser';
@@ -14,6 +13,8 @@ import {
   ANDROID_PACKAGE,
   EXPO_DEV_REDIRECT
 } from '@env';
+import { SecureStorageAdapter } from './secure-storage-adapter';
+import { storeAuthData } from './secure-storage.service';
 
 // Initialize Supabase
 const supabaseUrl = SUPABASE_URL;
@@ -23,10 +24,13 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables. Please check your .env file.');
 }
 
+// Create a secure storage adapter for Supabase auth
+const secureStorageAdapter = new SecureStorageAdapter();
+
 // Create Supabase client
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    storage: AsyncStorage,
+    storage: secureStorageAdapter,
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,
@@ -87,22 +91,37 @@ export const getGoogleOAuthUrl = async () => {
   return data.url;
 };
 
-// Set OAuth session from redirect
-export const setOAuthSession = async (tokens: {
-  access_token: string;
-  refresh_token: string;
-}) => {
-  const { data, error } = await supabase.auth.setSession({
-    access_token: tokens.access_token,
-    refresh_token: tokens.refresh_token,
-  });
-
-  if (error) {
+// Export the setOAuthSession function so it can be used by other services
+export const setOAuthSession = async (sessionData: { 
+  access_token: string; 
+  refresh_token: string; 
+}): Promise<void> => {
+  try {
+    const { data, error } = await supabase.auth.setSession({
+      access_token: sessionData.access_token,
+      refresh_token: sessionData.refresh_token,
+    });
+    
+    if (error) {
+      console.error('Error setting session:', error);
+      throw error;
+    }
+    
+    // Also store the session data in our secure storage for easier access
+    if (data.session) {
+      await storeAuthData(
+        sessionData.access_token,
+        sessionData.refresh_token,
+        data.session,
+        data.user
+      );
+    }
+    
+    console.log('Session set successfully');
+  } catch (error) {
     console.error('Error setting session:', error);
     throw error;
   }
-
-  return data;
 };
 
 // Extract params from URL after OAuth redirect
@@ -164,24 +183,52 @@ export const signInWithGoogle = async () => {
       }
     );
 
-    console.log('Auth session result:', JSON.stringify(result, null, 2));
-
-    // Handle the result
-    if (result.type === 'success') {
+    console.log('Auth session result type:', result.type);
+    
+    if (result.type === 'success' && result.url) {
+      console.log('Auth successful, processing redirect URL');
       const params = extractParamsFromUrl(result.url);
       
       if (!params.access_token || !params.refresh_token) {
+        console.error('Missing tokens in OAuth response', params);
         throw new Error('No access token or refresh token found in the response');
       }
 
+      console.log('Setting OAuth session with tokens');
       // Set the session in Supabase
-      return await setOAuthSession({
+      const { data, error } = await supabase.auth.setSession({
         access_token: params.access_token,
         refresh_token: params.refresh_token,
       });
+      
+      if (error) {
+        console.error('Error setting session:', error);
+        throw error;
+      }
+      
+      console.log('Session set successfully, user info:', data.user?.email);
+      
+      // Store tokens in secure storage
+      if (data.session) {
+        await storeAuthData(
+          params.access_token,
+          params.refresh_token,
+          data.session,
+          data.user
+        );
+      }
+      
+      // Return the user and session from the setSession response
+      return { 
+        user: data.user, 
+        session: data.session 
+      };
+      
     } else if (result.type === 'cancel') {
+      console.log('Authentication was cancelled by user');
       throw new Error('Authentication was cancelled');
     } else {
+      console.error('Authentication failed with result type:', result.type);
       throw new Error(`Authentication failed: ${result.type}`);
     }
   } catch (error) {
@@ -196,5 +243,34 @@ export const signOut = async () => {
   if (error) {
     console.error('Error signing out:', error);
     throw error;
+  }
+};
+
+// Add a function to handle token refresh
+export const refreshSession = async (): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase.auth.refreshSession();
+    
+    if (error) {
+      console.error('Error refreshing session:', error);
+      return false;
+    }
+    
+    if (data.session) {
+      // Store the refreshed tokens
+      await storeAuthData(
+        data.session.access_token,
+        data.session.refresh_token,
+        data.session,
+        data.user
+      );
+      console.log('Session refreshed successfully');
+      return true;
+    }
+    
+    return false;
+  } catch (error) {
+    console.error('Error during session refresh:', error);
+    return false;
   }
 };

@@ -1,4 +1,4 @@
-package com.x779wv3.client
+package com.x779wv3.pacemakers
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

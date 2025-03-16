@@ -148,4 +148,18 @@ The Pacer app is a modern, cost-efficient, and scalable mobile application built
 - **Schema Evolution**: WatermelonDB migrations for schema updates.
 - **User Feedback**: Sync status indicators via hooks/components.
 
+
+---
+
+## Encryption
+
+### Recommendations Based on Use Case
+- **For storing sensitive credentials and tokens**:
+  - Use `expo-secure-store` as it leverages platform-specific security features
+- **For encrypting arbitrary data with AES**:
+  - Use `crypto-es` as it's the most compatible AES implementation for Expo
+- **For implementing end-to-end encryption**:
+  - Consider `react-native-tweet-nacl-expo` which implements the NaCl library
+- **For PKCE implementation specifically**:
+  - Use `expo-crypto` (for SHA-256 hashing) and `expo-random` (for secure random bytes generation)
 ---
