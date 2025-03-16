@@ -1,0 +1,13 @@
+diff --git a/node_modules/@nozbe/watermelondb/WatermelonDB.podspec b/node_modules/@nozbe/watermelondb/WatermelonDB.podspec
+index 9a9c5e9..f5a7d1c 100644
+--- a/node_modules/@nozbe/watermelondb/WatermelonDB.podspec
++++ b/node_modules/@nozbe/watermelondb/WatermelonDB.podspec
+@@ -16,7 +16,7 @@ Pod::Spec.new do |s|
+   s.source_files  = "native/ios/**/*.{h,m,mm,swift,c,cpp}", "native/shared/**/*.{h,m,mm,swift,c,cpp}"
+   s.public_header_files = "native/ios/WatermelonDB/SupportingFiles/Bridging.h"
+   
+-  s.dependency "simdjson"
++  s.dependency "simdjson", "~> 3.1.0"
+   s.dependency "React-Core"
+   
+   s.xcconfig = {
