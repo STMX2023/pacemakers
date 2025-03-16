@@ -1,8 +1,18 @@
 import { Redirect, Stack } from 'expo-router';
 import { useAuth } from '@/authentication/hooks/useAuth';
+import { View, ActivityIndicator } from 'react-native';
 
 export default function AuthLayout() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
+
+  // Show loading indicator while checking auth state
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
 
   // If the user is authenticated, redirect to the app
   if (isAuthenticated) {
@@ -10,9 +20,12 @@ export default function AuthLayout() {
   }
 
   return (
-    <Stack>
-      <Stack.Screen name="login" options={{ headerShown: false }} />
-      <Stack.Screen name="signup" options={{ headerShown: false }} />
+    <Stack screenOptions={{ 
+      headerShown: false,
+      animation: 'fade',
+    }}>
+      <Stack.Screen name="login" />
+      <Stack.Screen name="signup" />
     </Stack>
   );
 } 

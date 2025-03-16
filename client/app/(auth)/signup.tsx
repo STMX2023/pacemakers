@@ -7,26 +7,33 @@ const SignupScreen = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { signUp, loginWithGoogle, isLoading, error } = useAuth();
+  const [localError, setLocalError] = useState<string | null>(null);
 
   const handleSignup = async () => {
     if (!name || !email || !password) {
-      // Add validation logic here
+      setLocalError('All fields are required');
       return;
     }
 
     try {
-      setLoading(true);
-      // In a real app, you would register the user first
-      // For now, we'll just log them in directly
-      await login(email, password);
+      setLocalError(null);
+      await signUp(email, password);
       // The redirect will happen automatically in the app layout
     } catch (error) {
       console.error('Signup error:', error);
-      // Handle signup error
-    } finally {
-      setLoading(false);
+      setLocalError((error as Error).message);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      setLocalError(null);
+      await loginWithGoogle();
+      // The redirect will happen automatically in the app layout
+    } catch (error) {
+      console.error('Google login error:', error);
+      setLocalError((error as Error).message);
     }
   };
 
@@ -38,6 +45,10 @@ const SignupScreen = () => {
     <View style={styles.container}>
       <Text style={styles.title}>Sign Up</Text>
       
+      {(localError || error) && (
+        <Text style={styles.errorText}>{localError || error}</Text>
+      )}
+      
       <View style={styles.form}>
         <TextInput
           style={styles.input}
@@ -45,7 +56,7 @@ const SignupScreen = () => {
           value={name}
           onChangeText={setName}
           autoCapitalize="words"
-          editable={!loading}
+          editable={!isLoading}
         />
         
         <TextInput
@@ -55,7 +66,7 @@ const SignupScreen = () => {
           onChangeText={setEmail}
           keyboardType="email-address"
           autoCapitalize="none"
-          editable={!loading}
+          editable={!isLoading}
         />
         
         <TextInput
@@ -64,25 +75,43 @@ const SignupScreen = () => {
           value={password}
           onChangeText={setPassword}
           secureTextEntry
-          editable={!loading}
+          editable={!isLoading}
         />
         
         <TouchableOpacity 
-          style={[styles.button, loading && styles.buttonDisabled]} 
+          style={[styles.button, isLoading && styles.buttonDisabled]} 
           onPress={handleSignup}
-          disabled={loading}
+          disabled={isLoading}
         >
-          {loading ? (
+          {isLoading ? (
             <ActivityIndicator color="white" />
           ) : (
             <Text style={styles.buttonText}>Sign Up</Text>
+          )}
+        </TouchableOpacity>
+
+        <View style={styles.divider}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>OR</Text>
+          <View style={styles.dividerLine} />
+        </View>
+
+        <TouchableOpacity 
+          style={[styles.googleButton, isLoading && styles.buttonDisabled]} 
+          onPress={handleGoogleLogin}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator color="white" />
+          ) : (
+            <Text style={styles.buttonText}>Sign up with Google</Text>
           )}
         </TouchableOpacity>
       </View>
       
       <View style={styles.footer}>
         <Text>Already have an account? </Text>
-        <TouchableOpacity onPress={navigateToLogin} disabled={loading}>
+        <TouchableOpacity onPress={navigateToLogin} disabled={isLoading}>
           <Text style={styles.link}>Login</Text>
         </TouchableOpacity>
       </View>
@@ -120,8 +149,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  googleButton: {
+    backgroundColor: '#DB4437',
+    height: 50,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   buttonDisabled: {
-    backgroundColor: '#99CCFF',
+    opacity: 0.7,
   },
   buttonText: {
     color: 'white',
@@ -135,6 +171,25 @@ const styles = StyleSheet.create({
   link: {
     color: '#007AFF',
     fontWeight: '600',
+  },
+  errorText: {
+    color: 'red',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 16,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#ddd',
+  },
+  dividerText: {
+    marginHorizontal: 8,
+    color: '#666',
   },
 });
 
