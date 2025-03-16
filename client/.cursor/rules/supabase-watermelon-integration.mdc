@@ -1,0 +1,89 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+To integrate **WatermelonDB** with **Supabase** in your Expo React Native app, you need to create a synchronization system that allows data to move between WatermelonDB (a local, offline database) and Supabase (a remote, online database). This ensures your app works offline and syncs seamlessly with the server when online. Below is a complete explanation of how this integration happens:
+
+---
+
+### 1. Overview of the Integration
+The integration revolves around two main goals:
+- **Offline Functionality**: WatermelonDB handles all local data storage and operations, allowing the app to work without an internet connection.
+- **Synchronization**: When the app is online, it syncs local changes to Supabase and retrieves updates from Supabase to keep both databases consistent.
+
+The process involves setting up WatermelonDB, defining sync logic, and managing how data flows between the local and remote databases.
+
+---
+
+### 2. Setting Up WatermelonDB Locally
+First, configure WatermelonDB in your app:
+- **Initialize the Database**: Use a SQLite adapter (suitable for React Native) to set up WatermelonDB. This is typically done in a file like `src/database/database.ts`.
+- **Define Models and Schema**: Create models (e.g., `User`, `Group`) in `src/database/models/` that match your Supabase table structures. Define the schema in `src/database/schema.ts` to specify fields like `id`, `name`, or `updated_at`.
+- **Local CRUD Operations**: Use WatermelonDB’s API to read, create, update, and delete data locally. For example, fetching a user would involve querying the local WatermelonDB instance.
+
+This setup ensures your app can operate offline by relying solely on WatermelonDB.
+
+---
+
+### 3. Synchronization Logic
+The core of the integration is syncing data between WatermelonDB and Supabase. WatermelonDB provides a sync mechanism that you customize with two key functions, typically defined in `src/database/sync.ts`:
+
+#### a. Pull Changes (Supabase → WatermelonDB)
+- **What It Does**: Fetches new or updated data from Supabase that has changed since the last sync.
+- **How It Works**:
+  - Query Supabase tables (e.g., via its REST API) for records where the `updated_at` timestamp is newer than the last sync time.
+  - For each table (e.g., `users`, `groups`), retrieve records and format them for WatermelonDB.
+  - Update or insert these records into the local database.
+  - Handle deletions by checking for records marked as deleted in Supabase (e.g., with a `deleted_at` field).
+
+#### b. Push Changes (WatermelonDB → Supabase)
+- **What It Does**: Sends local changes (creates, updates, deletes) to Supabase.
+- **How It Works**:
+  - WatermelonDB tracks all local changes since the last sync.
+  - For each change:
+    - **Created Records**: Insert new records into Supabase.
+    - **Updated Records**: Update existing records in Supabase with the new data.
+    - **Deleted Records**: Either mark records as deleted in Supabase or remove them entirely (depending on your app’s design).
+  - Use Supabase’s API to perform these operations.
+
+---
+
+### 4. Handling Conflicts
+During sync, conflicts can occur if the same record is modified both locally and on Supabase. Here’s how to manage them:
+- **Default Approach**: WatermelonDB uses a "last-write-wins" strategy, where the most recent change (based on timestamps like `updated_at`) takes priority.
+- **Custom Approach**: For more control, add a `version` field to your tables. Compare versions during sync to decide which change wins, or prompt the user to resolve the conflict.
+
+---
+
+### 5. Triggering Synchronization
+You can trigger sync in different ways:
+- **Manual Sync**: Run the sync process when the user opens the app or performs a specific action (e.g., saving a form).
+- **Automatic Sync**: Use Supabase’s real-time subscriptions to detect server changes and trigger a sync automatically.
+- **Background Sync**: Implement periodic syncing with a library like `react-native-background-fetch` when the app is not actively in use.
+
+---
+
+### 6. Connecting to the UI
+In your Expo app:
+- **Data Access**: Use custom hooks (e.g., `useUser`) to fetch data from WatermelonDB and display it in your screens (e.g., `src/app/(app)/index.tsx`).
+- **Sync Feedback**: Show the user a status like "Syncing..." or "Offline" to indicate what’s happening with the data.
+
+---
+
+### 7. Error Handling
+- **Network Issues**: If a sync fails due to a bad connection, retry the operation later (e.g., implement retry logic in `sync.service.ts`).
+- **User Feedback**: Notify the user when the app is offline or if a sync attempt fails.
+
+---
+
+### How It All Fits Together
+Here’s the complete flow:
+1. **Local Work**: The app reads and writes data to WatermelonDB, ensuring offline functionality.
+2. **Sync Trigger**: A sync is initiated (manually, automatically, or in the background).
+3. **Pull Updates**: The app fetches changes from Supabase and updates WatermelonDB.
+4. **Push Updates**: Local changes are sent to Supabase.
+5. **Conflict Resolution**: Any conflicts are resolved during the sync.
+6. **UI Refresh**: The app’s UI updates automatically as WatermelonDB’s data changes.
+
+This integration allows your Expo React Native app to function offline with WatermelonDB while staying in sync with Supabase when online, providing a fast and reliable user experience.

@@ -1,0 +1,151 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Pacer App Source Code Map
+
+The Pacer app is a modern, cost-efficient, and scalable mobile application built with **Expo React Native**. It uses **Expo Router** for file-based routing, **WatermelonDB** for offline-first data management, and **Supabase** for backend services. It prioritizes performance, reliability, and an exceptional offline/online experience.
+
+---
+
+## Tech Stack
+
+- **React Native with Expo** (SDK 52): Cross-platform mobile framework with Hermes engine.
+- **TypeScript**: Ensures type safety and maintainability.
+- **Expo Router**: File-based routing for intuitive navigation.
+- **Supabase**: PostgreSQL-based backend with real-time capabilities.
+- **WatermelonDB**: Offline-first local database with SQLite.
+- **TanStack Query**: Manages server-side state and caching.
+- **Zustand**: Lightweight global state management (e.g., auth, settings).
+- **Jotai**: Fine-grained UI and form state management.
+- **React Hook Form + Zod**: Streamlined form handling and validation.
+- **ESLint + Prettier**: Enforces code quality and consistency.
+- **Husky + lint-staged**: Automates pre-commit linting.
+- **Expo Notifications**: Handles push notifications.
+- **Expo WebBrowser**: Facilitates secure authentication flows.
+- **Reanimated + Gesture Handler**: Enables smooth animations and interactions.
+
+---
+
+## Key Features
+
+### WatermelonDB Integration
+- **Offline-First**: Stores data locally in SQLite with relational models (e.g., `users`, `groups`).
+- **Performance**: Optimized queries with indexing for speed.
+- **Reactive UI**: Observables trigger automatic UI updates on data changes.
+- **Synchronization**: Two-way sync with Supabase via `pullChanges` and `pushChanges`.
+- **Conflict Resolution**: Custom strategies (e.g., timestamp or version-based).
+- **Scalability**: Efficient for small to medium datasets, with large-scale optimizations.
+- **Background Sync**: Uses `react-native-background-fetch` for efficient offline/online sync.
+
+### Expo Router
+- **File-Based Routing**: Screens and layouts defined by directory structure.
+- **Deep Linking**: Built-in support for auth and navigation flows.
+- **Navigation**: Programmatic control with `useRouter` and `useNavigation`.
+
+### Authentication
+- **OAuth**: Secure flows via **Expo WebBrowser**.
+- **Session Management**: Persistent auth state stored in **Zustand**.
+- **Deep Linking**: Handled by Expo Router for auth callbacks.
+
+## Routing with Expo Router
+
+- **Structure**:
+  - `(auth)/`: Grouped routes for authentication screens (`login.tsx`, `signup.tsx`).
+  - `(app)/`: Grouped routes for main app screens (`index.tsx`, `settings.tsx`).
+  - `_layout.tsx`: Defines shared layouts (e.g., navigation bar or tab bar).
+- **Navigation**:
+  - Use `useRouter` for programmatic navigation (e.g., `router.push('/settings')`).
+  - Use `useNavigation` for navigation state and events.
+- **Deep Linking**:
+  - Configured in `app.json` and handled by Expo Router’s linking system.
+
+---
+
+## State Management
+
+- **WatermelonDB**: Core local data store with sync to Supabase.
+- **TanStack Query**: Server-side state for real-time or non-offline data.
+- **Zustand**: Global state for auth and app settings.
+- **Jotai**: Granular state for UI components and forms.
+
+---
+
+## Database
+
+- **Local**: WatermelonDB (SQLite) with tables like `users`, `groups`.
+- **Remote**: Supabase (PostgreSQL) with mirrored tables:
+  - `users`
+  - `user_profiles`
+  - `groups`
+  - `group_members`
+- **Sync**: Custom `pullChanges`/`pushChanges` with Supabase RPC/REST APIs.
+- **Real-Time**: Supabase subscriptions trigger sync updates.
+
+---
+
+## Setup Instructions
+
+1. **Install Dependencies**:
+   ```bash
+   npx expo install @nozbe/watermelondb @supabase/supabase-js react-native-background-fetch
+   ```
+2. **Configure Expo Router**:
+   - Define routes in `src/app/`.
+   - Set up deep linking in `app.json`.
+3. **Initialize WatermelonDB**:
+   - Define models and schema in `src/database/`.
+   - Wrap app with a WatermelonDB provider in `_layout.tsx`.
+4. **Set Up Supabase**:
+   - Initialize client in `supabase.service.ts`.
+   - Configure sync in `sync.service.ts`.
+5. **Run**:
+   ```bash
+   npx expo start
+   ```
+
+---
+
+## Best Practices
+
+- **Offline Priority**: Use WatermelonDB for all data access; sync in the background.
+- **Minimal Sync**: Optimize `pullChanges`/`pushChanges` for small payloads.
+- **Error Handling**: Implement retries and user-friendly messages in `sync.service.ts`.
+- **Code Organization**: Keep files small and focused; use absolute imports (e.g., `@/hooks/useSync`).
+- **Performance**: Index WatermelonDB columns for frequent queries.
+
+---
+
+## Build Configuration
+
+### Babel
+- **Preset**: `babel-preset-expo`
+- **Plugins**:
+  - `react-native-reanimated/plugin`
+  - `module-resolver`:
+    - Root: `./src`
+    - Alias: `@` → `./src`
+
+### TypeScript
+- Update `tsconfig.json`:
+  ```json
+  {
+    "compilerOptions": {
+      "baseUrl": "./",
+      "paths": { "@/*": ["src/*"] }
+    }
+  }
+  ```
+
+---
+
+## Enhancements
+
+- **Conflict Resolution**: Version-based tracking for concurrent edits.
+- **Background Sync**: Battery-efficient scheduling with `react-native-background-fetch`.
+- **Data Consistency**: Retry logic for failed syncs with logging.
+- **Schema Evolution**: WatermelonDB migrations for schema updates.
+- **User Feedback**: Sync status indicators via hooks/components.
+
+---
