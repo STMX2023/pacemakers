@@ -1,7 +1,13 @@
 import { create } from 'zustand';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import * as authService from '@/services/auth.service';
-import { clearAuthData, getSecureItem, getSecureObject, STORAGE_KEYS, storeAuthData } from '@/services/secure-storage.service';
+import { 
+  clearCryptoAuthData, 
+  getCryptoItem, 
+  getCryptoObject, 
+  STORAGE_KEYS, 
+  storeCryptoAuthData 
+} from '@/services/crypto-storage.service';
 
 // Use our custom User type that extends SupabaseUser
 type User = SupabaseUser & {
@@ -45,15 +51,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ isAuthenticated: true, user });
         console.log('Auth checked: User is authenticated', user?.email);
       } else {
-        // If no valid session in Supabase, check secure storage as a fallback
-        const accessToken = await getSecureItem(STORAGE_KEYS.ACCESS_TOKEN);
-        const user = await getSecureObject<User>(STORAGE_KEYS.USER);
+        // If no valid session in Supabase, check crypto storage as a fallback
+        const accessToken = await getCryptoItem(STORAGE_KEYS.ACCESS_TOKEN);
+        const user = await getCryptoObject<User>(STORAGE_KEYS.USER);
         
         if (accessToken && user) {
           // We have stored credentials, try to restore the session
           try {
             // Try to set the session with the stored tokens
-            const refreshToken = await getSecureItem(STORAGE_KEYS.REFRESH_TOKEN);
+            const refreshToken = await getCryptoItem(STORAGE_KEYS.REFRESH_TOKEN);
             if (refreshToken) {
               await authService.setOAuthSession({
                 access_token: accessToken,
@@ -61,16 +67,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
               });
               
               set({ isAuthenticated: true, user });
-              console.log('Auth restored from secure storage', user?.email);
+              console.log('Auth restored from crypto storage', user?.email);
             } else {
               // Missing refresh token, cannot restore session
-              await clearAuthData();
+              await clearCryptoAuthData();
               set({ isAuthenticated: false, user: null });
             }
           } catch (e) {
             // Session restoration failed, tokens may be expired
             console.error('Failed to restore session:', e);
-            await clearAuthData();
+            await clearCryptoAuthData();
             set({ isAuthenticated: false, user: null });
           }
         } else {
@@ -94,7 +100,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       
       // Store auth data securely
       if (session && user) {
-        await storeAuthData(
+        await storeCryptoAuthData(
           session.access_token,
           session.refresh_token,
           session,
@@ -121,7 +127,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       
       // Store auth data securely if we have a session
       if (session && user) {
-        await storeAuthData(
+        await storeCryptoAuthData(
           session.access_token,
           session.refresh_token,
           session,
@@ -180,8 +186,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ isLoading: true, error: null });
       await authService.signOut();
       
-      // Clear secure storage
-      await clearAuthData();
+      // Clear crypto storage
+      await clearCryptoAuthData();
       
       set({ isAuthenticated: false, user: null });
       console.log('Logout successful');

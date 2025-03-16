@@ -1,3 +1,8 @@
+// Import Buffer polyfill at the entry point
+import { Buffer } from 'buffer';
+// Ensure global Buffer is available
+global.Buffer = Buffer;
+
 import 'react-native-reanimated';
 import 'react-native-gesture-handler';
 import { registerRootComponent } from 'expo';

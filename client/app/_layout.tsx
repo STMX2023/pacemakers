@@ -8,6 +8,7 @@ import { View, Text, ActivityIndicator } from 'react-native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useAuth } from '@/authentication/hooks/useAuth';
 import { installAuthInterceptor } from '@/utils/api.interceptor';
+import { migrateFromSecureStore } from '@/services/storage-migration.service';
 
 // Set explicit initial route
 export const unstable_settings = {
@@ -24,20 +25,37 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const { isLoading: authLoading } = useAuth();
   const [appIsReady, setAppIsReady] = useState(false);
+  const [migrationComplete, setMigrationComplete] = useState(false);
   
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
 
+  // Migrate data from SecureStore to CryptoStorage
   useEffect(() => {
-    if (loaded) {
-      // Only mark the app as ready when fonts are loaded
+    async function runMigration() {
+      try {
+        await migrateFromSecureStore();
+        setMigrationComplete(true);
+      } catch (error) {
+        console.error('Error during storage migration:', error);
+        // Continue app initialization even if migration fails
+        setMigrationComplete(true);
+      }
+    }
+    
+    runMigration();
+  }, []);
+
+  useEffect(() => {
+    if (loaded && migrationComplete) {
+      // Only mark the app as ready when fonts are loaded and migration is complete
       setAppIsReady(true);
       SplashScreen.hideAsync().catch((err) => {
         console.warn('Error hiding splash screen:', err);
       });
     }
-  }, [loaded]);
+  }, [loaded, migrationComplete]);
 
   // Show a loading state until everything is ready
   if (!appIsReady || authLoading) {

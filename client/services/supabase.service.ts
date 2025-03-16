@@ -13,8 +13,8 @@ import {
   ANDROID_PACKAGE,
   EXPO_DEV_REDIRECT
 } from '@env';
-import { SecureStorageAdapter } from './secure-storage-adapter';
-import { storeAuthData } from './secure-storage.service';
+import { CryptoStorageAdapter } from './crypto-storage-adapter';
+import { storeCryptoAuthData } from './crypto-storage.service';
 
 // Initialize Supabase
 const supabaseUrl = SUPABASE_URL;
@@ -24,13 +24,13 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables. Please check your .env file.');
 }
 
-// Create a secure storage adapter for Supabase auth
-const secureStorageAdapter = new SecureStorageAdapter();
+// Create a secure storage adapter for Supabase auth using our new crypto adapter
+const cryptoStorageAdapter = new CryptoStorageAdapter();
 
-// Create Supabase client
+// Create Supabase client with the new adapter
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    storage: secureStorageAdapter,
+    storage: cryptoStorageAdapter,
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,
@@ -107,9 +107,9 @@ export const setOAuthSession = async (sessionData: {
       throw error;
     }
     
-    // Also store the session data in our secure storage for easier access
+    // Also store the session data in our crypto storage for easier access
     if (data.session) {
-      await storeAuthData(
+      await storeCryptoAuthData(
         sessionData.access_token,
         sessionData.refresh_token,
         data.session,
@@ -208,9 +208,9 @@ export const signInWithGoogle = async () => {
       
       console.log('Session set successfully, user info:', data.user?.email);
       
-      // Store tokens in secure storage
+      // Store tokens in crypto storage instead of secure storage
       if (data.session) {
-        await storeAuthData(
+        await storeCryptoAuthData(
           params.access_token,
           params.refresh_token,
           data.session,
@@ -258,7 +258,7 @@ export const refreshSession = async (): Promise<boolean> => {
     
     if (data.session) {
       // Store the refreshed tokens
-      await storeAuthData(
+      await storeCryptoAuthData(
         data.session.access_token,
         data.session.refresh_token,
         data.session,
