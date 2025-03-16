@@ -7,7 +7,7 @@ alwaysApply: true
 
 ```
 Directory structure:
-└── pacemakers/
+└── stmx2023-pacemakers/
     └── client/
         ├── README.md
         ├── app.config.ts
@@ -19,15 +19,77 @@ Directory structure:
         ├── tsconfig.json
         ├── .gitignore
         ├── .npmrc
+        ├── android/
+        │   ├── gradle.properties
+        │   ├── gradlew
+        │   ├── gradlew.bat
+        │   ├── .gitignore
+        │   ├── app/
+        │   │   ├── debug.keystore
+        │   │   ├── proguard-rules.pro
+        │   │   └── src/
+        │   │       ├── debug/
+        │   │       │   └── AndroidManifest.xml
+        │   │       └── main/
+        │   │           ├── AndroidManifest.xml
+        │   │           ├── java/
+        │   │           │   └── com/
+        │   │           │       └── x779wv3/
+        │   │           │           └── client/
+        │   │           │               ├── MainActivity.kt
+        │   │           │               └── MainApplication.kt
+        │   │           └── res/
+        │   │               ├── drawable/
+        │   │               │   ├── ic_launcher_background.xml
+        │   │               │   └── rn_edit_text_material.xml
+        │   │               ├── drawable-hdpi/
+        │   │               ├── drawable-mdpi/
+        │   │               ├── drawable-xhdpi/
+        │   │               ├── drawable-xxhdpi/
+        │   │               ├── drawable-xxxhdpi/
+        │   │               ├── mipmap-anydpi-v26/
+        │   │               │   ├── ic_launcher.xml
+        │   │               │   └── ic_launcher_round.xml
+        │   │               ├── mipmap-hdpi/
+        │   │               │   ├── ic_launcher.webp
+        │   │               │   ├── ic_launcher_foreground.webp
+        │   │               │   └── ic_launcher_round.webp
+        │   │               ├── mipmap-mdpi/
+        │   │               │   ├── ic_launcher.webp
+        │   │               │   ├── ic_launcher_foreground.webp
+        │   │               │   └── ic_launcher_round.webp
+        │   │               ├── mipmap-xhdpi/
+        │   │               │   ├── ic_launcher.webp
+        │   │               │   ├── ic_launcher_foreground.webp
+        │   │               │   └── ic_launcher_round.webp
+        │   │               ├── mipmap-xxhdpi/
+        │   │               │   ├── ic_launcher.webp
+        │   │               │   ├── ic_launcher_foreground.webp
+        │   │               │   └── ic_launcher_round.webp
+        │   │               ├── mipmap-xxxhdpi/
+        │   │               │   ├── ic_launcher.webp
+        │   │               │   ├── ic_launcher_foreground.webp
+        │   │               │   └── ic_launcher_round.webp
+        │   │               ├── values/
+        │   │               │   ├── colors.xml
+        │   │               │   ├── strings.xml
+        │   │               │   └── styles.xml
+        │   │               └── values-night/
+        │   │                   └── colors.xml
+        │   └── gradle/
+        │       └── wrapper/
+        │           └── gradle-wrapper.properties
         ├── api/
         │   └── sync.ts
         ├── app/
         │   ├── +not-found.tsx
         │   ├── _layout.tsx
         │   ├── (app)/
+        │   │   ├── _layout.tsx
         │   │   ├── index.tsx
         │   │   └── settings.tsx
         │   ├── (auth)/
+        │   │   ├── _layout.tsx
         │   │   ├── login.tsx
         │   │   └── signup.tsx
         │   └── (tabs)/
@@ -40,7 +102,9 @@ Directory structure:
         │   └── images/
         ├── authentication/
         │   ├── store.ts
-        │   └── validation.ts
+        │   ├── validation.ts
+        │   └── hooks/
+        │       └── useAuth.ts
         ├── components/
         │   ├── Collapsible.tsx
         │   ├── ExternalLink.tsx
@@ -72,6 +136,39 @@ Directory structure:
         │   ├── useColorScheme.ts
         │   ├── useColorScheme.web.ts
         │   └── useThemeColor.ts
+        ├── ios/
+        │   ├── Podfile
+        │   ├── Podfile.lock
+        │   ├── Podfile.properties.json
+        │   ├── .gitignore
+        │   ├── .xcode.env
+        │   ├── client/
+        │   │   ├── AppDelegate.h
+        │   │   ├── AppDelegate.mm
+        │   │   ├── client-Bridging-Header.h
+        │   │   ├── client.entitlements
+        │   │   ├── Info.plist
+        │   │   ├── main.m
+        │   │   ├── noop-file.swift
+        │   │   ├── PrivacyInfo.xcprivacy
+        │   │   ├── SplashScreen.storyboard
+        │   │   ├── Images.xcassets/
+        │   │   │   ├── Contents.json
+        │   │   │   ├── AppIcon.appiconset/
+        │   │   │   │   └── Contents.json
+        │   │   │   ├── SplashScreenBackground.colorset/
+        │   │   │   │   └── Contents.json
+        │   │   │   └── SplashScreenLogo.imageset/
+        │   │   │       └── Contents.json
+        │   │   └── Supporting/
+        │   │       └── Expo.plist
+        │   ├── client.xcodeproj/
+        │   │   ├── project.pbxproj
+        │   │   └── xcshareddata/
+        │   │       └── xcschemes/
+        │   │           └── client.xcscheme
+        │   └── client.xcworkspace/
+        │       └── contents.xcworkspacedata
         ├── patches/
         │   └── @nozbe+watermelondb+0.27.1.patch
         ├── repositories/
@@ -102,9 +199,11 @@ Directory structure:
         │   └── deep-linking.ts
         └── .cursor/
             └── rules/
+                ├── directory-structure.mdc
                 ├── project-overview.mdc
                 ├── supabase-watermelon-integration.mdc
                 └── watermelon-db.mdc
+
 
 ```
 
